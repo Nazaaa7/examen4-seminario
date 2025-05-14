@@ -11,7 +11,8 @@
    cd formEmails
 3. instalar las dependencias necesarias con
 npm i
-**Para probar el form se necesita*
+**Para probar el form se necesita**
+
 4.1. Activar la verificación en dos pasos en Google
   *Accede a tu cuenta de Google.
   *Ve a "Seguridad" y activa "Verificación en dos pasos".
