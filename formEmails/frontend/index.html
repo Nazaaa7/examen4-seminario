@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulario de Envío de Correo</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .email-form {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+    .form-title {
+      margin-bottom: 25px;
+      color: #333;
+    }
+    .btn-submit {
+      width: 100%;
+    }
+    .file-info {
+      font-size: 0.8rem;
+      color: #6c757d;
+    }
+    #loadingSpinner {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="email-form">
+      <h2 class="form-title text-center">Enviar Correo Electrónico</h2>
+      
+      <div id="alertBox" class="alert d-none" role="alert"></div>
+      
+      <form id="emailForm">
+        <div class="mb-3">
+          <label for="recipient" class="form-label">Destinatario:</label>
+          <input type="email" class="form-control" id="recipient" name="to" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="subject" class="form-label">Asunto:</label>
+          <input type="text" class="form-control" id="subject" name="subject" required>
+        </div>
+        
+        <div class="mb-3">
+          <label for="message" class="form-label">Mensaje:</label>
+          <textarea class="form-control" id="message" name="message" rows="6" required></textarea>
+        </div>
+        
+        <div class="mb-3">
+          <label for="attachment" class="form-label">Adjunto (opcional):</label>
+          <input type="file" class="form-control" id="attachment" name="attachment">
+          <div class="file-info mt-1">* Tamaño máximo: 5MB</div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary btn-submit mt-3">
+          <span id="loadingSpinner" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+          Enviar Correo
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('emailForm');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const alertBox = document.getElementById('alertBox');
+      const fileInput = document.getElementById('attachment');
+      
+      // verificar el tamaño del archivo antes de enviar
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files[0] && fileInput.files[0].size > 5 * 1024 * 1024) {
+          mostrarAlerta('El archivo no debe superar los 5MB', 'danger');
+          fileInput.value = '';
+        }
+      });
+      
+      // envio del form
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // mostrar el spinner de carga
+        loadingSpinner.style.display = 'inline-block';
+        
+        try {
+          const formData = new FormData(form);
+          
+          const response = await fetch('http://localhost:3000/api/send-email', {
+            method: 'POST',
+            body: formData
+          });
+          
+          const result = await response.json();
+          
+          if (result.success) {
+            mostrarAlerta(result.message, 'success');
+            form.reset();
+          } else {
+            mostrarAlerta(result.message, 'danger');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          mostrarAlerta('Ocurrió un error al enviar el correo', 'danger');
+        } finally {
+          
+          loadingSpinner.style.display = 'none';
+        }
+      });
+      
+      // alertas
+      function mostrarAlerta(mensaje, tipo) {
+        alertBox.textContent = mensaje;
+        alertBox.className = `alert alert-${tipo}`;
+        
+       
+        setTimeout(() => {
+          alertBox.className = 'alert d-none';
+        }, 5000);
+      }
+    });
+  </script>
+</body>
+</html>

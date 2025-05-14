@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Predicción con TensorFlow.js</title>
+  <!-- importa TensorFlow.js desde CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js"></script>
+  <!-- importa Plotly para graficar -->
+  <script src="https://cdn.plot.ly/plotly-2.18.2.min.js"></script>
+</head>
+<body>
+  <h2>Predicción Y = 2X + 8 con TensorFlow.js</h2>
+  <p id="resultado"></p>
+  <div id="grafico"></div>
+
+  <script>
+    // crea un array de 15 valores de entrada x que van desde -3 hasta 11 inclusive
+    const xTrain = tf.tensor1d(Array.from({ length: 15 }, (_, i) => i - 3));
+
+    // genera los valores de salida y usando la fórmula y = 2x + 8
+    const yTrain = xTrain.mul(2).add(8);
+
+    // define un modelo secuencial con una sola capa densa
+    const model = tf.sequential();
+
+    // agrega una capa densa con 1 neurona y una entrada (x)
+    model.add(tf.layers.dense({ units: 1, inputShape: [1] }));
+
+    // compila el modelo con el optimizador 'adam' y la función de pérdida 'meanSquaredError'
+    model.compile({
+      optimizer: 'adam',
+      loss: 'meanSquaredError'
+    });
+
+    // arreglo donde se guardarán las pérdidas (loss) por época
+    const losses = [];
+
+    // entrena el modelo durante 525 épocas
+    async function entrenar() {
+      await model.fit(xTrain, yTrain, {
+        epochs: 525,
+        verbose: 0,
+        callbacks: {
+          // guarda la pérdida de cada época en el array losses
+          onEpochEnd: async (epoch, logs) => {
+            losses.push(logs.loss);
+          }
+        }
+      });
+
+      // define el valor x para el que queremos predecir y
+      const xTest = tf.tensor1d([50]);
+
+      // realiza la predicción con el modelo entrenado
+      const yPred = model.predict(xTest);
+
+      // obtiene el valor predicho y lo muestra en pantalla
+      yPred.data().then(pred => {
+        document.getElementById("resultado").innerText =
+          `El valor predicho de Y para x = 50 es: ${pred[0].toFixed(2)}`;
+      });
+
+      // llama a la función para graficar la pérdida
+      graficarPerdida();
+    }
+
+    // función para graficar la pérdida utilizando Plotly.js
+    function graficarPerdida() {
+      const data = [{
+        x: Array.from({ length: losses.length }, (_, i) => i + 1), // épocas
+        y: losses, // valores de pérdida
+        type: 'scatter',
+        mode: 'lines+markers',
+        name: 'Pérdida (MSE)',
+        line: { color: 'blue' }
+      }];
+
+      const layout = {
+        title: 'Función de pérdida durante el entrenamiento',
+        xaxis: { title: 'Épocas' },
+        yaxis: { title: 'Pérdida (MSE)' }
+      };
+
+      // dibuja el gráfico dentro del div con id "grafico"
+      Plotly.newPlot('grafico', data, layout);
+    }
+
+    // ejecuta la función de entrenamiento al cargar la página
+    entrenar();
+  </script>
+</body>
+</html>

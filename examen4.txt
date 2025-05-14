@@ -1,0 +1,50 @@
+Tema 4 - Garcia Nazarena
+
+1 - Que función se utiliza para la limpieza automática de tensores en memoria, y en caso de querer mantener algún tensor en memoria una
+	vez terminada la función en cuestión, que método se utiliza para ello ?.
+
+Respuesta: Para la limpieza automática de tensores en TensorFlow.js se utiliza la función tf.tidy(). Esta función ejecuta un bloque de código y automáticamente elimina todos los tensores intermedios creados dentro de él, liberando memoria.
+
+Para mantener un tensor en memoria después de terminar el bloque de tf.tidy(), se debe retornar explícitamente ese tensor, ya que los valores retornados no se eliminan. Ejemplo: 
+
+const tensor = tf.tidy(() => {
+  const temp = tf.tensor([1, 2, 3]);
+  return temp;
+});
+
+
+
+2 - Cual es el cuarto valor agregado a un RGB que lo extiende y para que sirve. Escriba un tensor con con los valores máximos y mínimos que pueden tomar
+	el RGB con la extensión adicional planteada.
+
+El cuarto valor agregado a un color RGB es el canal alfa (A), siirve para representar la transparencia o la opacidad del pixel:
+
+0 = completamente transparente
+
+1 = completamente opaco
+
+Un tensor que representa valores máximos y mínimos en un formato RGBA sería:
+
+tf.tensor([[[0, 0, 0, 0], [255, 255, 255, 1]]])
+[0, 0, 0, 0] = negro completamente transparente
+
+[255, 255, 255, 1] =  blanco completamente opaco
+
+3 - Escriba un código en una sola linea que cree un tensor con la forma [10, 10] con números aleatorios (Random) del 1 al 4 y que el tensor solo 
+    muestre datos enteros, utilice el método propuesto en la sección API correspondiente del sitio de https://js.tensorflow.org/api/latest/.
+
+Ejemplo utilizando el método en la sección de API de tensorflow:
+
+    tf.randomUniform([10, 10], 1, 5, 'int32');
+
+Se crea un tensor 2D de 10x10 con valores aleatorios enteros entre 1 (incluido) y 4 (incluido), el int32 hace que los números generados deben ser enteros de 32 bits.
+
+
+
+4 – Donde Puedo ejecutar un modelo de aprendizaje? Justifique su respuesta.
+   
+    a - CPU
+    b - GPU	
+    c - memoria RAM
+	
+Respuesta: Un modelo se puede ejecutar  en la CPU como en el GPU, dependiendo de la configuración de TensorFlow.js (y si hay soporte CUDA en caso de usar GPU).
